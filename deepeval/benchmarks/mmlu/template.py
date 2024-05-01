@@ -11,14 +11,19 @@ class MMLUTemplate:
     def generate_output(
         input: str, train_set: object, task: MMLUTask, n_shots: int
     ):
-        prompt = "The following are multiple choice questions (with answers) about{}.\n\n"
-        prompt = prompt.format(MMLUTemplate.format_subject(task.value))
+        if n_shots > 0: 
+            prompt = "The following are {} multiple choice example questions (with answers) about{}, followed by the actual question that you need to answer to.\n\n"
+        else:
+            prompt = ""
+        prompt = prompt.format(n_shots-1, MMLUTemplate.format_subject(task.value))
         for i in range(n_shots):
-            prompt += MMLUTemplate.format_question(train_set[i])
+            example = i<n_shots-1
+            prompt += MMLUTemplate.format_question(train_set[i], include_answer=example)
         prompt += input
 
         # define ouptut confinement
-        prompt += "Output 'A', 'B', 'C', or 'D'. Full answer not needed."
+        #prompt += "Output 'A', 'B', 'C', or 'D'. Full answer not needed."
+        prompt += "\nAnswer to this question only 'A', 'B', 'C', or 'D'. Don't provide any further comments or explanation as this will invalidate the answer. "
         return prompt
 
     @staticmethod
@@ -28,8 +33,9 @@ class MMLUTemplate:
         for j in range(len(choices)):
             choice = choices[j]
             prompt += "\n{}. {}".format(choice, data[choice])
-        prompt += "\nAnswer:"
+        
         if include_answer:
+            prompt += "\nAnswer:"
             prompt += " {}\n\n".format(data["target"])
         return prompt
 
