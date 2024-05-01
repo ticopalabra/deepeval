@@ -78,35 +78,26 @@ class MMLU(DeepEvalBaseBenchmark):
             task=task,
             n_shots=self.n_shots,
         )
-        print("DEBUG#1: *****************************\n" + prompt)
-        #print('DEBUG#1: prompt type is : ' + str(type(prompt)))
-        #print("DEBUG#1: **************END***************\n")
+        print("INFO: *****************************\n" + prompt)
         
         promptlist=[prompt]
         prediction = model.generate(promptlist)
         
-        #print("DEBUG#2: *****************************\n")
-        #print('DEBUG#2: prediction type is : ' + str(type(prediction)))
-        print('DEBUG#2: prediction class')
-        #print(prediction)
-        #prediction_lst = prediction.flatten()
-        prediction_lst = prediction.dict()
-        #print('DEBUG#2: prediction dictionary')
-        #print(prediction_lst)
-        #print('DEBUG#2: prediction_lst type is : ' + str(type(prediction_lst)))
-
-        print(prediction_lst['generations'][0][0]["text"])
-        #print("DEBUG#2: **************END***************\n")
+        
+        prediction_dic = prediction.dict()
+        
+        print(f"INFO: predicted output: {prediction_dic['generations'][0][0]['text']}")
+    
 
         # Define Metric
         score = self.scorer.exact_match_score(
-            golden.expected_output, prediction_lst['generations'][0][0]["text"]
+            golden.expected_output, prediction_dic['generations'][0][0]["text"]
         )
-        #print("DEBUG#3: *****************************\n")
-        print('DEBUG#3: expected output ')
-        print(golden.expected_output)
-        print('Debug#3: score =  '+str(score))
-        print('DEBUG#3: **************END***************\n')
+
+        print(f'INFO: expected output: {golden.expected_output}') 
+        #print(golden.expected_output)
+        print(f'INFO: score =  {score}')
+        print('INFO: **************END***************\n')
         return {"prediction": prediction, "score": score}
 
     def load_benchmark_dataset(self, task: MMLUTask) -> List[Golden]:
